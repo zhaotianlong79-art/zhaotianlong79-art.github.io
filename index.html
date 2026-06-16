@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tianlong · Personal</title>
+  <meta name="description" content="tianlong 的个人主页" />
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- React + ReactDOM (UMD) -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel (在浏览器中编译 JSX，方便直接双击运行) -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide 图标 -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <script>
+    // Tailwind 配置：开启 class 模式暗黑 + 自定义动画
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            // 优先使用 Apple 系统字体 SF Pro，回退到 Inter
+            sans: ['-apple-system', 'BlinkMacSystemFont', 'SF Pro Display', 'SF Pro Text', 'Inter', 'ui-sans-serif', 'system-ui', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],
+          },
+          letterSpacing: {
+            tightest: '-0.04em',
+          },
+          keyframes: {
+            'aurora': {
+              '0%, 100%': { transform: 'translate(0,0) scale(1)' },
+              '33%':      { transform: 'translate(4%, -6%) scale(1.1)' },
+              '66%':      { transform: 'translate(-5%, 4%) scale(0.95)' },
+            },
+            'float': {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%':      { transform: 'translateY(-8px)' },
+            },
+            'shimmer': {
+              '0%':   { backgroundPosition: '200% center' },
+              '100%': { backgroundPosition: '-200% center' },
+            },
+          },
+          animation: {
+            'aurora-slow': 'aurora 18s ease-in-out infinite',
+            'aurora-mid':  'aurora 14s ease-in-out infinite reverse',
+            'float':       'float 6s ease-in-out infinite',
+            'shimmer':     'shimmer 6s linear infinite',
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+    html { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body { overflow-x: hidden; }
+
+    /* 滚动揭示：轻微上移 + 缩放（Apple 风格的克制动效） */
+    .reveal {
+      opacity: 0;
+      transform: translateY(36px) scale(0.98);
+      transition: opacity .9s cubic-bezier(.16,1,.3,1), transform .9s cubic-bezier(.16,1,.3,1);
+      will-change: opacity, transform;
+    }
+    .reveal.in-view { opacity: 1; transform: translateY(0) scale(1); }
+
+    /* 鼠标跟随高光 */
+    .glow { background: radial-gradient(550px circle at var(--x,50%) var(--y,0%), rgba(120,120,255,.10), transparent 65%); }
+
+    /* 渐变文字 */
+    .text-gradient {
+      background: linear-gradient(120deg, #1d1d1f 0%, #6e6e73 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    .dark .text-gradient {
+      background: linear-gradient(120deg, #fafafa 0%, #a1a1aa 60%, #818cf8 100%);
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+    /* 流光高亮文字 */
+    .text-shine {
+      background: linear-gradient(110deg, #6366f1, #a855f7, #ec4899, #6366f1);
+      background-size: 200% auto;
+      -webkit-background-clip: text; background-clip: text; color: transparent;
+    }
+
+    /* 极光光斑 */
+    .blob { position: absolute; border-radius: 9999px; filter: blur(80px); opacity: .55; pointer-events: none; }
+    .dark .blob { opacity: .35; }
+
+    /* 滚动条 */
+    ::-webkit-scrollbar { width: 9px; }
+    ::-webkit-scrollbar-thumb { background: rgba(140,140,160,.35); border-radius: 9999px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .reveal { transition: none; opacity: 1; transform: none; }
+      .animate-aurora-slow, .animate-aurora-mid, .animate-float, .animate-shimmer { animation: none; }
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <!-- ============================================================= -->
+  <!-- 中心化配置文件：修改这里即可改变整站内容与排版（无需改组件） -->
+  <!-- 在真实多文件项目中，这部分就是独立的 config.js                 -->
+  <!-- ============================================================= -->
+  <script>
+    window.SITE_CONFIG = {
+      // 双语字段写法：用 { zh, en } 对象即可；若中英文相同，直接写字符串也行
+      profile: {
+        name: "tianlong",
+        avatar: "https://github.com/zhaotianlong79-art.png", // GitHub 头像
+        title: { zh: "Python 后端 / LLM Agent 开发", en: "Python Backend / LLM Agent Dev" },
+        bio: {
+          zh: "做过智能驾驶算法与图像模型训练，现专注于 LLM Agent 与 Python 后端开发。",
+          en: "Worked on autonomous-driving algorithms & vision model training; now focused on LLM Agents and Python backend.",
+        },
+        location: { zh: "中国 · 深圳", en: "Shenzhen, China" },
+        socials: {
+          github: "https://github.com/zhaotianlong79-art",
+          email:  "zhaotianlong79@gmail.com",
+          twitter: "",          // 留空则不显示
+          website: "https://blog.csdn.net/weixin_44807674", // CSDN 博客
+          linkedin: "",
+        },
+      },
+
+      // 排版/功能开关：组件会读取这些值来决定是否渲染对应模块
+      layout: {
+        showExperience: true,
+        showProjects: true,
+        showAwards: true,
+        theme: "system",        // 初始主题："light" | "dark" | "system"
+        lang: "zh",             // 初始语言："zh" | "en"
+        accent: "indigo",       // 主题强调色：indigo / emerald / rose / sky / amber
+      },
+
+      awards: [
+        {
+          title: { zh: "蓝桥杯 · 省赛一等奖", en: "Lanqiao Cup · 1st Prize (Provincial)" },
+          org:   { zh: "蓝桥杯全国软件和信息技术专业人才大赛", en: "Lanqiao Cup National Competition" },
+        },
+        {
+          title: { zh: "蓝桥杯 · 国赛二等奖", en: "Lanqiao Cup · 2nd Prize (National)" },
+          org:   { zh: "蓝桥杯全国软件和信息技术专业人才大赛", en: "Lanqiao Cup National Competition" },
+        },
+        {
+          title: { zh: "ACM-ICPC · 铜奖", en: "ACM-ICPC · Bronze Medal" },
+          org:   { zh: "国际大学生程序设计竞赛", en: "International Collegiate Programming Contest" },
+        },
+      ],
+
+      experiences: [
+        {
+          time: "2025.03 - 2026.04",
+          role: { zh: "Python 后端开发工程师", en: "Python Backend Engineer" },
+          company: { zh: "Z.AI · 深圳", en: "Z.AI · Shenzhen" },
+          desc: {
+            zh: "负责 LLM Agent 相关的 Python 后端开发，构建智能体服务与接口能力。",
+            en: "Built Python backend services for LLM Agents, including agent runtime and APIs.",
+          },
+        },
+        {
+          time: "2022.06 - 2025.02",
+          role: { zh: "智能驾驶算法工程师", en: "Autonomous Driving Algorithm Engineer" },
+          company: { zh: "华为 OD", en: "Huawei (OD)" },
+          desc: {
+            zh: "负责模型训练数据处理与图像模型训练；实现车辆哨兵模式、大灯投影游戏动作等算法落地。",
+            en: "Owned training-data processing & vision model training; shipped sentinel mode and headlight-projection motion algorithms.",
+          },
+        },
+        {
+          time: "2021.10 - 2022.05",
+          role: { zh: "Python 数据处理工程师", en: "Python Data Engineer" },
+          company: { zh: "云南白药", en: "Yunnan Baiyao" },
+          desc: {
+            zh: "负责数据处理相关工作，使用 Python 完成数据清洗、加工与分析支持。",
+            en: "Handled data processing with Python: cleaning, transformation, and analytics support.",
+          },
+        },
+      ],
+
+      projects: [
+        {
+          name: "tianlong-code",
+          repo: "https://github.com/zhaotianlong79-art/tianlong-code",
+          tech: ["Go", "Agent", "CLI"],
+          desc: {
+            zh: "一个轻量级的 Code Agent，用 Go 实现的精简编码智能体。",
+            en: "A lightweight code agent — a streamlined coding agent built in Go.",
+          },
+          stars: 0,
+        },
+        {
+          name: "chat_built_in_memory_ztl",
+          repo: "https://github.com/zhaotianlong79-art/chat_built_in_memory_ztl",
+          tech: ["Python", "RAG", "Multimodal"],
+          desc: {
+            zh: "Agent 基础框架，内置多模态知识库与检索召回能力。",
+            en: "Agent framework with a built-in multimodal knowledge base, retrieval and recall.",
+          },
+          stars: 1,
+        },
+        {
+          name: "colqwen2-v1.0-FastAPI",
+          repo: "https://github.com/zhaotianlong79-art/colqwen2-v1.0-FastAPI",
+          tech: ["Python", "FastAPI", "CV"],
+          desc: {
+            zh: "基于 colqwen2 的图像向量化模型服务，结合 FastAPI 对外提供接口。",
+            en: "Image vectorization service based on colqwen2, served via FastAPI.",
+          },
+          stars: 1,
+        },
+        {
+          name: "openai_chat_deepseek",
+          repo: "https://github.com/zhaotianlong79-art/openai_chat_deepseek",
+          tech: ["Python", "LLM"],
+          desc: {
+            zh: "提供大模型基础对话能力的 Python 服务，支持调用多种 LLM。",
+            en: "Python service providing core LLM dialogue capabilities across multiple models.",
+          },
+          stars: 1,
+        },
+        {
+          name: "tianlong-hermes-agent",
+          repo: "https://github.com/zhaotianlong79-art/tianlong-hermes-agent",
+          tech: ["Python", "Agent"],
+          desc: {
+            zh: "面向智能体场景改造的 Hermes 实现。",
+            en: "A modified Hermes implementation adapted for agent use cases.",
+          },
+          stars: 0,
+        },
+      ],
+
+      footer: {
+        text: "Designed & Built by tianlong",
+      },
+    };
+  </script>
+
+  <!-- ============================================================= -->
+  <!-- 应用代码（在真实项目中拆为 App.js / 各组件）                    -->
+  <!-- ============================================================= -->
+  <script type="text/babel" data-presets="react">
+    const { useEffect, useRef, useState, createContext, useContext } = React;
+    const CFG = window.SITE_CONFIG;
+
+    // ---------- 国际化 ----------
+    const LangCtx = createContext("zh");
+    // 取双语字段：传入字符串则原样返回，传入 {zh,en} 则按当前语言返回
+    function useT() {
+      const lang = useContext(LangCtx);
+      return (v) => (v && typeof v === "object" && !Array.isArray(v)) ? (v[lang] ?? v.zh ?? v.en) : v;
+    }
+    // 界面静态文案
+    const UI = {
+      zh: { careerKicker: "职业历程", career: "经历", workKicker: "精选作品", work: "项目",
+            awardsKicker: "荣誉", awards: "获奖经历",
+            github: "GitHub", email: "邮箱", twitter: "Twitter", website: "博客", linkedin: "领英",
+            light: "浅色", dark: "深色", system: "跟随系统" },
+      en: { careerKicker: "Career", career: "Experience", workKicker: "Selected Work", work: "Projects",
+            awardsKicker: "Honors", awards: "Awards",
+            github: "GitHub", email: "Email", twitter: "Twitter", website: "Blog", linkedin: "LinkedIn",
+            light: "Light", dark: "Dark", system: "System" },
+    };
+    function useUI() { return UI[useContext(LangCtx)] || UI.zh; }
+
+    // ---------- 品牌图标（Lucide 新版已移除，内置 SVG）----------
+    const BRAND = {
+      Github: "M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.5v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.7 1.3 3.4 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.8 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0C17.3 4.7 18.3 5 18.3 5c.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.5-2.7 5.5-5.3 5.8.4.4.8 1.1.8 2.2v3.3c0 .3.2.6.8.5A11.5 11.5 0 0 0 23.5 12C23.5 5.7 18.3.5 12 .5z",
+      Twitter: "M18.9 2H22l-7.6 8.7L23.3 22h-7L11 15.3 4.9 22H1.8l8.2-9.4L.9 2h7.2l4.8 6.3L18.9 2zm-1.2 18h1.7L6.4 3.8H4.6L17.7 20z",
+      Linkedin: "M4.98 3.5A2.5 2.5 0 1 0 5 8.5a2.5 2.5 0 0 0-.02-5zM3 9h4v12H3V9zm6 0h3.8v1.7h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.4c0-1.3 0-2.96-1.8-2.96-1.8 0-2.08 1.4-2.08 2.86V21H9V9z",
+    };
+    function BrandIcon({ name, className = "w-4 h-4" }) {
+      return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+          <path d={BRAND[name]} />
+        </svg>
+      );
+    }
+
+    // 强调色映射（Tailwind 在 CDN 模式下需要静态类名，这里做安全映射）
+    const ACCENTS = {
+      indigo:  { text: "text-indigo-400",  bg: "bg-indigo-500",  ring: "ring-indigo-500/40",  dot: "bg-indigo-500",  grad: "from-indigo-500 to-violet-500",  hover: "hover:border-indigo-500/50" },
+      emerald: { text: "text-emerald-400", bg: "bg-emerald-500", ring: "ring-emerald-500/40", dot: "bg-emerald-500", grad: "from-emerald-500 to-teal-500",   hover: "hover:border-emerald-500/50" },
+      rose:    { text: "text-rose-400",    bg: "bg-rose-500",    ring: "ring-rose-500/40",    dot: "bg-rose-500",    grad: "from-rose-500 to-pink-500",      hover: "hover:border-rose-500/50" },
+      sky:     { text: "text-sky-400",     bg: "bg-sky-500",     ring: "ring-sky-500/40",     dot: "bg-sky-500",     grad: "from-sky-500 to-cyan-500",       hover: "hover:border-sky-500/50" },
+      amber:   { text: "text-amber-400",   bg: "bg-amber-500",   ring: "ring-amber-500/40",   dot: "bg-amber-500",   grad: "from-amber-500 to-orange-500",   hover: "hover:border-amber-500/50" },
+    };
+    const A = ACCENTS[CFG.layout.accent] || ACCENTS.indigo;
+
+    // Lucide 图标组件封装（使用官方稳定 API：data-lucide + createIcons）
+    // 将驼峰名转为 kebab-case，例如 ArrowUpRight -> arrow-up-right
+    const toKebab = (s) => s.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
+    function Icon({ name, className = "w-5 h-5", strokeWidth = 2 }) {
+      const ref = useRef(null);
+      useEffect(() => {
+        if (ref.current && window.lucide) {
+          ref.current.innerHTML = "";
+          const i = document.createElement("i");
+          i.setAttribute("data-lucide", toKebab(name));
+          i.setAttribute("class", className);
+          i.setAttribute("stroke-width", strokeWidth);
+          ref.current.appendChild(i);
+          window.lucide.createIcons({ nameAttr: "data-lucide", attrs: { class: className } });
+        }
+      }, [name, className]);
+      return <span ref={ref} className="inline-flex" aria-hidden="true" />;
+    }
+
+    // 滚动揭示 Hook
+    function useReveal() {
+      useEffect(() => {
+        const els = document.querySelectorAll(".reveal");
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) { e.target.classList.add("in-view"); io.unobserve(e.target); }
+          });
+        }, { threshold: 0.12 });
+        els.forEach((el) => io.observe(el));
+        return () => io.disconnect();
+      });
+    }
+
+    // 鼠标跟随光斑
+    function useGlow(ref) {
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        const onMove = (e) => {
+          const r = el.getBoundingClientRect();
+          el.style.setProperty("--x", `${e.clientX - r.left}px`);
+          el.style.setProperty("--y", `${e.clientY - r.top}px`);
+        };
+        el.addEventListener("mousemove", onMove);
+        return () => el.removeEventListener("mousemove", onMove);
+      }, []);
+    }
+
+    // ---------- 社交链接配置（映射到图标）----------
+    // brand:true 使用内置 SVG（Lucide 新版已移除品牌图标）；否则用 Lucide 通用图标
+    const SOCIAL_META = {
+      github:   { icon: "Github",   brand: true,  key: "github" },
+      email:    { icon: "Mail",     prefix: "mailto:", key: "email" },
+      twitter:  { icon: "Twitter",  brand: true,  key: "twitter" },
+      website:  { icon: "Globe",    key: "website" },
+      linkedin: { icon: "Linkedin", brand: true,  key: "linkedin" },
+    };
+
+    function SocialLinks({ socials }) {
+      const ui = useUI();
+      const items = Object.entries(socials).filter(([, v]) => v && v.trim());
+      return (
+        <div className="flex flex-wrap items-center justify-center gap-3">
+          {items.map(([key, val]) => {
+            const meta = SOCIAL_META[key]; if (!meta) return null;
+            const href = (meta.prefix || "") + val;
+            const label = ui[meta.key] || key;
+            return (
+              <a key={key} href={href} target={meta.prefix ? undefined : "_blank"} rel="noreferrer"
+                 title={label}
+                 className={`group flex items-center gap-2 rounded-full border border-zinc-200/80 dark:border-white/10 bg-white/70 dark:bg-white/5 px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-200 backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-xl dark:hover:bg-white/10 dark:hover:shadow-black/40 ${A.hover}`}>
+                {meta.brand ? <BrandIcon name={meta.icon} className="w-4 h-4" /> : <Icon name={meta.icon} className="w-4 h-4" />}
+                <span>{label}</span>
+              </a>
+            );
+          })}
+        </div>
+      );
+    }
+
+    // ---------- 极光渐变背景 ----------
+    function Aurora() {
+      const ref = useRef(null);
+      // 随滚动产生轻微视差
+      useEffect(() => {
+        const el = ref.current; if (!el) return;
+        const onScroll = () => { el.style.transform = `translateY(${window.scrollY * 0.15}px)`; };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+      }, []);
+      return (
+        <div ref={ref} className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <div className="blob animate-aurora-slow" style={{ width: "42rem", height: "42rem", top: "-12rem", left: "-8rem", background: "radial-gradient(circle, #818cf8, transparent 60%)" }} />
+          <div className="blob animate-aurora-mid"  style={{ width: "38rem", height: "38rem", top: "-6rem", right: "-10rem", background: "radial-gradient(circle, #f0abfc, transparent 60%)" }} />
+          <div className="blob animate-aurora-slow" style={{ width: "34rem", height: "34rem", top: "40%", left: "30%", background: "radial-gradient(circle, #67e8f9, transparent 60%)" }} />
+        </div>
+      );
+    }
+
+    // ---------- 4. Awards ----------
+    function Awards({ awards }) {
+      const t = useT();
+      const ui = useUI();
+      return (
+        <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
+          <SectionTitle icon="Trophy" kicker={ui.awardsKicker}>{ui.awards}</SectionTitle>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {awards.map((a, i) => (
+              <div key={i} className="reveal group flex flex-col items-center rounded-3xl border border-zinc-200/80 dark:border-white/10 bg-white/70 dark:bg-white/5 p-6 text-center backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-xl dark:hover:shadow-black/40"
+                   style={{ transitionDelay: `${i * 70}ms` }}>
+                <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${A.grad} text-white shadow-lg transition-transform duration-500 group-hover:scale-110`}>
+                  <Icon name="Medal" className="w-6 h-6" />
+                </span>
+                <h3 className="text-base font-semibold text-zinc-900 dark:text-white">{t(a.title)}</h3>
+                <p className="mt-1.5 text-xs leading-relaxed text-zinc-500 dark:text-zinc-400">{t(a.org)}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+      );
+    }
+
+    // ---------- 三态主题切换（浅色 / 深色 / 跟随系统）----------
+    function ThemeSwitch({ mode, setMode }) {
+      const ui = useUI();
+      const opts = [
+        { key: "light",  icon: "Sun",     title: ui.light },
+        { key: "dark",   icon: "Moon",    title: ui.dark },
+        { key: "system", icon: "Monitor", title: ui.system },
+      ];
+      return (
+        <div className="flex items-center gap-0.5 rounded-full border border-zinc-200/80 dark:border-white/10 bg-white/60 dark:bg-white/5 p-0.5 backdrop-blur">
+          {opts.map((o) => (
+            <button key={o.key} onClick={() => setMode(o.key)} title={o.title} aria-label={o.title}
+              className={`flex h-7 w-7 items-center justify-center rounded-full transition-all duration-300 ${mode === o.key ? `bg-gradient-to-br ${A.grad} text-white shadow` : "text-zinc-500 hover:text-zinc-800 dark:text-zinc-400 dark:hover:text-white"}`}>
+              <Icon name={o.icon} className="w-[15px] h-[15px]" />
+            </button>
+          ))}
+        </div>
+      );
+    }
+
+    // ---------- 语言切换 ----------
+    function LangSwitch({ lang, setLang }) {
+      return (
+        <button onClick={() => setLang(lang === "zh" ? "en" : "zh")} aria-label="Language"
+          className="flex h-8 items-center gap-1.5 rounded-full border border-zinc-200/80 dark:border-white/10 bg-white/60 dark:bg-white/5 px-3 text-xs font-semibold text-zinc-600 backdrop-blur transition-all duration-300 hover:text-zinc-900 hover:scale-105 dark:text-zinc-300 dark:hover:text-white">
+          <Icon name="Languages" className="w-[15px] h-[15px]" />
+          {lang === "zh" ? "EN" : "中"}
+        </button>
+      );
+    }
+
+    // ---------- 顶部毛玻璃导航 ----------
+    function Nav({ name, mode, setMode, lang, setLang }) {
+      const [scrolled, setScrolled] = useState(false);
+      useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 24);
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+      }, []);
+      return (
+        <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${scrolled ? "py-2" : "py-4"}`}>
+          <div className={`mx-auto flex max-w-3xl items-center justify-between rounded-2xl px-4 transition-all duration-500 ${scrolled ? "border border-white/40 dark:border-white/10 bg-white/70 dark:bg-zinc-900/60 py-2 shadow-lg shadow-black/5 backdrop-blur-xl" : "border border-transparent py-2"}`} style={{ marginLeft: "1rem", marginRight: "1rem" }}>
+            <a href="#top" className="text-[15px] font-semibold tracking-tight text-zinc-900 dark:text-white">{name}</a>
+            <div className="flex items-center gap-2">
+              <LangSwitch lang={lang} setLang={setLang} />
+              <ThemeSwitch mode={mode} setMode={setMode} />
+            </div>
+          </div>
+        </nav>
+      );
+    }
+
+    // ---------- 1. Hero ----------
+    function Hero({ profile }) {
+      const ref = useRef(null);
+      const t = useT();
+      useGlow(ref);
+      return (
+        <header id="top" ref={ref} className="glow relative">
+          <div className="mx-auto max-w-3xl px-6 pt-36 pb-24 sm:pt-44 sm:pb-28">
+            <div className="reveal flex flex-col items-center text-center">
+              <div className="relative mb-8 animate-float">
+                <div className={`absolute inset-0 -z-10 rounded-full bg-gradient-to-br ${A.grad} blur-2xl opacity-50`} />
+                <img src={profile.avatar} alt={profile.name}
+                     className="h-32 w-32 rounded-full object-cover ring-1 ring-black/5 dark:ring-white/10 shadow-2xl" />
+                <span className={`absolute bottom-2.5 right-2.5 h-4 w-4 rounded-full ${A.dot} ring-4 ring-white dark:ring-zinc-950`}></span>
+              </div>
+
+              <p className={`mb-4 inline-flex items-center gap-1.5 rounded-full border border-zinc-200 dark:border-white/10 bg-white/60 dark:bg-white/5 px-3.5 py-1.5 text-xs font-medium ${A.text} backdrop-blur`}>
+                <span className={`h-1.5 w-1.5 rounded-full ${A.dot} animate-pulse`} /> {t(profile.title)}
+              </p>
+
+              <h1 className="text-6xl sm:text-7xl font-bold tracking-tightest leading-[1.05]">
+                <span className="text-gradient">{profile.name}</span>
+              </h1>
+
+              <p className="mt-6 max-w-xl text-xl leading-relaxed text-zinc-500 dark:text-zinc-400">
+                {t(profile.bio)}
+              </p>
+
+              {profile.location && (
+                <div className="mt-4 flex items-center gap-1.5 text-sm text-zinc-400 dark:text-zinc-500">
+                  <Icon name="MapPin" className="w-4 h-4" /> {t(profile.location)}
+                </div>
+              )}
+
+              <div className="mt-9">
+                <SocialLinks socials={profile.socials} />
+              </div>
+            </div>
+          </div>
+        </header>
+      );
+    }
+
+    // ---------- 区块标题（Apple 风格：大字号居中 + 副标题）----------
+    function SectionTitle({ icon, kicker, children }) {
+      return (
+        <div className="reveal mb-14 flex flex-col items-center text-center">
+          <span className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${A.grad} text-white shadow-lg`}>
+            <Icon name={icon} className="w-6 h-6" />
+          </span>
+          {kicker && <p className={`mb-1 text-sm font-semibold ${A.text}`}>{kicker}</p>}
+          <h2 className="text-4xl sm:text-5xl font-bold tracking-tightest text-gradient">{children}</h2>
+        </div>
+      );
+    }
+
+    // ---------- 2. Experience (Timeline) ----------
+    function Experience({ experiences }) {
+      const t = useT();
+      const ui = useUI();
+      return (
+        <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
+          <SectionTitle icon="GraduationCap" kicker={ui.careerKicker}>{ui.career}</SectionTitle>
+          <ol className="relative border-l border-zinc-200 dark:border-white/10 ml-3">
+            {experiences.map((e, i) => (
+              <li key={i} className="reveal mb-10 ml-8" style={{ transitionDelay: `${i * 80}ms` }}>
+                <span className={`absolute -left-[7px] flex h-3.5 w-3.5 items-center justify-center rounded-full ${A.dot} ring-4 ring-white dark:ring-zinc-950`}></span>
+                <div className="rounded-3xl border border-zinc-200/80 dark:border-white/10 bg-white/70 dark:bg-white/5 p-6 backdrop-blur-xl transition-all duration-500 hover:shadow-xl dark:hover:shadow-black/40 hover:-translate-y-1">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{t(e.role)}</h3>
+                    <time className={`rounded-full bg-zinc-100 dark:bg-zinc-800 px-3 py-1 text-xs font-medium ${A.text}`}>{e.time}</time>
+                  </div>
+                  <p className="mt-1 text-sm font-medium text-zinc-500 dark:text-zinc-400">{t(e.company)}</p>
+                  <p className="mt-3 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{t(e.desc)}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+      );
+    }
+
+    // ---------- 3. Projects (Cards) ----------
+    function ProjectCard({ p, index }) {
+      const ref = useRef(null);
+      const t = useT();
+      useGlow(ref);
+      return (
+        <a ref={ref} href={p.repo} target="_blank" rel="noreferrer"
+           className={`glow reveal group relative flex flex-col rounded-3xl border border-zinc-200/80 dark:border-white/10 bg-white/70 dark:bg-white/5 p-7 backdrop-blur-xl transition-all duration-500 hover:-translate-y-1.5 hover:shadow-2xl dark:hover:shadow-black/50 ${A.hover}`}
+           style={{ transitionDelay: `${index * 70}ms` }}>
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-2.5">
+              <Icon name="Folder" className={`w-5 h-5 ${A.text}`} />
+              <h3 className="text-lg font-semibold text-zinc-900 dark:text-white">{p.name}</h3>
+            </div>
+            <Icon name="ArrowUpRight" className="w-5 h-5 text-zinc-400 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+          </div>
+          <p className="mt-3 flex-1 text-sm leading-relaxed text-zinc-600 dark:text-zinc-400">{t(p.desc)}</p>
+          <div className="mt-5 flex flex-wrap items-center gap-2">
+            {p.tech.map((t) => (
+              <span key={t} className="rounded-md bg-zinc-100 dark:bg-zinc-800 px-2.5 py-1 text-xs font-medium text-zinc-600 dark:text-zinc-300">{t}</span>
+            ))}
+          </div>
+          {typeof p.stars === "number" && (
+            <div className="mt-4 flex items-center gap-1.5 text-xs text-zinc-500 dark:text-zinc-500">
+              <Icon name="Star" className="w-3.5 h-3.5" /> {p.stars.toLocaleString()}
+            </div>
+          )}
+        </a>
+      );
+    }
+
+    function Projects({ projects }) {
+      const ui = useUI();
+      return (
+        <section className="mx-auto max-w-3xl px-6 py-20 sm:py-28">
+          <SectionTitle icon="Code2" kicker={ui.workKicker}>{ui.work}</SectionTitle>
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {projects.map((p, i) => <ProjectCard key={p.name} p={p} index={i} />)}
+          </div>
+        </section>
+      );
+    }
+
+    // ---------- 顶部滚动进度条 ----------
+    function ScrollProgress() {
+      const ref = useRef(null);
+      useEffect(() => {
+        const onScroll = () => {
+          const h = document.documentElement;
+          const p = h.scrollTop / (h.scrollHeight - h.clientHeight || 1);
+          if (ref.current) ref.current.style.transform = `scaleX(${p})`;
+        };
+        window.addEventListener("scroll", onScroll, { passive: true });
+        return () => window.removeEventListener("scroll", onScroll);
+      }, []);
+      return (
+        <div className="fixed inset-x-0 top-0 z-[60] h-0.5">
+          <div ref={ref} className={`h-full origin-left scale-x-0 bg-gradient-to-r ${A.grad}`} />
+        </div>
+      );
+    }
+
+    // ---------- 持久化读取（localStorage 优先于配置默认值）----------
+    const getStored = (k, fallback) => {
+      try { return localStorage.getItem(k) || fallback; } catch (e) { return fallback; }
+    };
+
+    // ---------- App ----------
+    function App() {
+      // 主题模式：light | dark | system
+      const [mode, setMode] = useState(getStored("theme-mode", CFG.layout.theme || "system"));
+      // 语言：zh | en
+      const [lang, setLang] = useState(getStored("lang", CFG.layout.lang || "zh"));
+      useReveal();
+
+      // 计算并应用实际主题（system 时跟随操作系统，并监听变化）
+      useEffect(() => {
+        const mq = window.matchMedia("(prefers-color-scheme: dark)");
+        const apply = () => {
+          const dark = mode === "dark" || (mode === "system" && mq.matches);
+          document.documentElement.classList.toggle("dark", dark);
+        };
+        apply();
+        try { localStorage.setItem("theme-mode", mode); } catch (e) {}
+        if (mode === "system") {
+          mq.addEventListener("change", apply);
+          return () => mq.removeEventListener("change", apply);
+        }
+      }, [mode]);
+
+      // 持久化语言 + 更新 <html lang>
+      useEffect(() => {
+        try { localStorage.setItem("lang", lang); } catch (e) {}
+        document.documentElement.setAttribute("lang", lang === "zh" ? "zh-CN" : "en");
+      }, [lang]);
+
+      return (
+        <LangCtx.Provider value={lang}>
+          <div className="relative min-h-screen bg-[#fbfbfd] dark:bg-[#050507] text-zinc-900 dark:text-zinc-100 font-sans selection:bg-indigo-500/30 transition-colors duration-700">
+            <Aurora />
+            <ScrollProgress />
+            <Nav name={CFG.profile.name} mode={mode} setMode={setMode} lang={lang} setLang={setLang} />
+
+            <Hero profile={CFG.profile} />
+
+            <main>
+              {CFG.layout.showExperience && CFG.experiences?.length > 0 && (
+                <Experience experiences={CFG.experiences} />
+              )}
+              {CFG.layout.showProjects && CFG.projects?.length > 0 && (
+                <Projects projects={CFG.projects} />
+              )}
+              {CFG.layout.showAwards && CFG.awards?.length > 0 && (
+                <Awards awards={CFG.awards} />
+              )}
+            </main>
+
+            <footer className="relative border-t border-zinc-200/70 dark:border-white/10 py-12">
+              <div className="mx-auto max-w-3xl px-6 flex flex-col items-center gap-6 text-center">
+                <SocialLinks socials={CFG.profile.socials} />
+                <p className="text-sm text-zinc-400 dark:text-zinc-500">
+                  © {new Date().getFullYear()} · {CFG.footer?.text || CFG.profile.name}
+                </p>
+              </div>
+            </footer>
+          </div>
+        </LangCtx.Provider>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+  </script>
+</body>
+</html>
