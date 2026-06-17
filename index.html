@@ -13,6 +13,12 @@
   <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
   <!-- Babel (在浏览器中编译 JSX，方便直接双击运行) -->
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- 注册使用 classic runtime 的 React preset，避免新版默认 automatic runtime 注入 import 语句 -->
+  <script>
+    Babel.registerPreset('classic-react', {
+      presets: [[Babel.availablePresets.react, { runtime: 'classic' }]],
+    });
+  </script>
   <!-- Lucide 图标 -->
   <script src="https://unpkg.com/lucide@latest"></script>
 
@@ -249,7 +255,7 @@
   <!-- ============================================================= -->
   <!-- 应用代码（在真实项目中拆为 App.js / 各组件）                    -->
   <!-- ============================================================= -->
-  <script type="text/babel" data-presets="react">
+  <script type="text/babel" data-presets="classic-react">
     const { useEffect, useRef, useState, createContext, useContext } = React;
     const CFG = window.SITE_CONFIG;
 
