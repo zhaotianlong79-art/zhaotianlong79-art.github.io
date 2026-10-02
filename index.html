@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>tianlong · Personal</title>
-  <meta name="description" content="tianlong 的个人主页" />
+  <title>zhaotianlong · Personal</title>
+  <meta name="description" content="zhaotianlong 的个人主页" />
 
   <!-- Tailwind CSS (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -121,7 +121,7 @@
     window.SITE_CONFIG = {
       // 双语字段写法：用 { zh, en } 对象即可；若中英文相同，直接写字符串也行
       profile: {
-        name: "tianlong",
+        name: "zhaotianlong",
         avatar: "https://github.com/zhaotianlong79-art.png", // GitHub 头像
         title: { zh: "Python 后端 / LLM Agent 开发", en: "Python Backend / LLM Agent Dev" },
         bio: {
@@ -165,7 +165,7 @@
 
       experiences: [
         {
-          time: "2025.03 - 2026.04",
+          time: "2025.03 - 2026.09",
           role: { zh: "Python 后端开发工程师", en: "Python Backend Engineer" },
           company: { zh: "Z.AI · 深圳", en: "Z.AI · Shenzhen" },
           desc: {
@@ -195,6 +195,26 @@
 
       projects: [
         {
+          name: "claude-dev-spec",
+          repo: "https://github.com/zhaotianlong79-art/claude-dev-spec",
+          tech: ["Python", "Agent", "Specification"],
+          desc: {
+            zh: "一套可直接套用到任何项目的 Claude 协作开发规范，包含文档、实现、测试、验证等完整流程。",
+            en: "A comprehensive Claude collaboration development specification applicable to any project, covering documentation, implementation, testing, and validation.",
+          },
+          stars: 0,
+        },
+        {
+          name: "ruby-ai-cli-starter",
+          repo: "https://github.com/zhaotianlong79-art/ruby-ai-cli-starter",
+          tech: ["Ruby", "AI", "CLI"],
+          desc: {
+            zh: "用 Ruby 做 AI 命令行工具的最小起点：支持流式输出、工具调用和用量统计。",
+            en: "Minimal starter for building AI CLI tools with Ruby: streaming output, tool calling, and usage statistics.",
+          },
+          stars: 0,
+        },
+        {
           name: "tianlong-code",
           repo: "https://github.com/zhaotianlong79-art/tianlong-code",
           tech: ["Go", "Agent", "CLI"],
@@ -204,50 +224,34 @@
           },
           stars: 0,
         },
+
+
+
+
         {
-          name: "chat_built_in_memory_ztl",
-          repo: "https://github.com/zhaotianlong79-art/chat_built_in_memory_ztl",
-          tech: ["Python", "RAG", "Multimodal"],
+          name: "RAG",
+          repo: "https://github.com/zhaotianlong79-art/RAG",
+          tech: ["Python", "RAG", "Knowledge Base"],
           desc: {
-            zh: "Agent 基础框架，内置多模态知识库与检索召回能力。",
-            en: "Agent framework with a built-in multimodal knowledge base, retrieval and recall.",
+            zh: "智能体基本框架，包含知识库（多模态）、检索召回功能。",
+            en: "Agent basic framework with knowledge base (multimodal), retrieval and recall functions.",
           },
           stars: 1,
         },
         {
-          name: "colqwen2-v1.0-FastAPI",
-          repo: "https://github.com/zhaotianlong79-art/colqwen2-v1.0-FastAPI",
-          tech: ["Python", "FastAPI", "CV"],
-          desc: {
-            zh: "基于 colqwen2 的图像向量化模型服务，结合 FastAPI 对外提供接口。",
-            en: "Image vectorization service based on colqwen2, served via FastAPI.",
-          },
-          stars: 1,
-        },
-        {
-          name: "openai_chat_deepseek",
-          repo: "https://github.com/zhaotianlong79-art/openai_chat_deepseek",
+          name: "openChat",
+          repo: "https://github.com/zhaotianlong79-art/openChat",
           tech: ["Python", "LLM"],
           desc: {
-            zh: "提供大模型基础对话能力的 Python 服务，支持调用多种 LLM。",
-            en: "Python service providing core LLM dialogue capabilities across multiple models.",
+            zh: "用 Python 写的调用大模型服务的基本对话功能。",
+            en: "Basic dialogue functionality for calling large model services, written in Python.",
           },
           stars: 1,
-        },
-        {
-          name: "tianlong-hermes-agent",
-          repo: "https://github.com/zhaotianlong79-art/tianlong-hermes-agent",
-          tech: ["Python", "Agent"],
-          desc: {
-            zh: "面向智能体场景改造的 Hermes 实现。",
-            en: "A modified Hermes implementation adapted for agent use cases.",
-          },
-          stars: 0,
         },
       ],
 
       footer: {
-        text: "Designed & Built by tianlong",
+        text: "Designed & Built by zhaotianlong",
       },
     };
   </script>
